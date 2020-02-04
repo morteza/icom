@@ -4,13 +4,22 @@ import pandas as pd
 
 from IPython.display import display
 
+# parameters
+window_size = 4
 
 # load data
 data = pd.read_csv('data/cl2016_nb.csv',index_col=0)
 
+categorical_cols = ['participant','block','stimulus','stimulus_type','choice']
+
+data[categorical_cols] = data[categorical_cols].astype('category')
+
+#DEBUG
+# display(data.info())
+
 data['N'] = np.where(data.condition=='2-back',2,3)
 data['correct'] = np.where(
-  (data.stimulus_type == data.choice) & (data.stimulus_type != 'burn-in'),
+  (data.stimulus_type.str == data.choice.str) & (data.stimulus_type != 'burn-in'),
   True,
   False
   )
@@ -37,6 +46,11 @@ data['n_lures'] =  grouped.lure.transform(
   lambda s: s.count() - s.value_counts()[False]
 )
 
-def recent_targets(x, window=4):
-  N = x.N.values[0]
-  
+data['n_recent_repetition'] = data.stimulus.cat.codes.rolling(window_size).apply(
+  lambda x: len(x) - x.nunique(),
+  raw=False
+)
+
+
+
+# %%
