@@ -46,11 +46,34 @@ data['n_lures'] =  grouped.lure.transform(
   lambda s: s.count() - s.value_counts()[False]
 )
 
-data['n_recent_repetition'] = data.stimulus.cat.codes.rolling(window_size).apply(
-  lambda x: len(x) - x.nunique(),
-  raw=False
-)
+def count_recent_repetitions(x):
+  x['n_recent_repetitions'] = x.stimulus.cat.codes.rolling(window_size).apply(
+    lambda stim: len(stim) - stim.nunique(),
+    raw=False
+  )
+  return x[['n_recent_repetitions']]
 
+
+def count_recent_targets(x):
+  target_cat_code = data.stimulus_type.cat.categories.get_loc('target')
+
+  x['n_recent_targets'] = x.stimulus_type.cat.codes.rolling(window_size).apply(
+    lambda stim: (stim == target_cat_code).sum(),
+    raw=False
+  )
+  return x[['n_recent_targets']]
+
+
+def count_recent_lures(x):
+  x['n_recent_lures'] = x.lure.rolling(window_size).apply(
+    lambda l: (l).sum(),
+    raw=False
+  )
+  return x[['n_recent_lures']]
+
+data['n_recent_repetitions'] = grouped.apply(count_recent_repetitions)
+data['n_recent_targets'] = grouped.apply(count_recent_targets)
+data['n_recent_lures'] = grouped.apply(count_recent_lures)
 
 
 # %%
