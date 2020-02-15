@@ -1,0 +1,16 @@
+name: icom
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - graphviz
+  - pip:
+    - ggplot
+    - matplotlib
+    - pandas
+    - numpy
+    - scipy
+    - statsmodels
+    - arviz
+    - pymc3
