@@ -61,11 +61,7 @@ class Tom2019Preprocessor():
     burn_ins = data['trial.index'] <= data.N
     data.loc[burn_ins,'stimulus_type'] = 'burn-in'
 
-    data['correct'] = np.where(
-      (data.stimulus_type == data.choice) & (data.stimulus_type != 'burn-in'),
-      True,
-      False
-      )
+    data['correct'] = (data.stimulus_type.str.lower() == data.choice.str.lower()) & (data.stimulus_type.str.lower() != 'burn-in')
 
 
     categorical_cols = ['participant','block','stimulus','stimulus_type','choice']
@@ -77,6 +73,10 @@ class Tom2019Preprocessor():
     data['n_targets'] = grouped.stimulus_type.transform(lambda s: s.value_counts()['target']
     )
 
+    # number of correct responses per block
+    #FIXME: what happens when all responses are incorrect
+    data['n_corrects'] = grouped.correct.transform(lambda s: s.value_counts()[True])
+
     data['lure'] = grouped.apply(self.__find_lures)
 
     data['n_lures'] =  grouped.lure.transform(
@@ -86,6 +86,7 @@ class Tom2019Preprocessor():
     data['n_recent_repetitions'] = grouped.apply(self.__count_recent_repetitions)
     data['n_recent_targets'] = grouped.apply(self.__count_recent_targets)
     data['n_recent_lures'] = grouped.apply(self.__count_recent_lures)
+    data['n_recent_corrects'] = grouped.apply(self.__count_recent_corrects)
 
     return data
 
@@ -122,3 +123,10 @@ class Tom2019Preprocessor():
       raw=False
     )
     return df[['n_recent_lures']]
+
+  def __count_recent_corrects(self,df):
+    df['n_recent_corrects'] = df.correct.rolling(self.window_size).apply(
+      lambda l: (l).sum(),
+      raw=False
+    )
+    return df[['n_recent_corrects']]

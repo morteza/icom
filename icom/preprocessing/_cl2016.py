@@ -37,10 +37,14 @@ class CL2016Preprocessor():
     grouped  = data.groupby(['participant','block','N'])
     data['n_targets'] = grouped.stimulus_type.transform(lambda s: s.value_counts()['target'])
     
+    #FIXME: what happens when all responses are incorrect
+    data['n_corrects'] = grouped.correct.transform(lambda s: s.value_counts()[True])
+
     data['lure'] = grouped.apply(self.__find_lures)
     data['n_recent_repetitions'] = grouped.apply(self.__count_recent_repetitions)
     data['n_recent_targets'] = grouped.apply(self.__count_recent_targets)
     data['n_recent_lures'] = grouped.apply(self.__count_recent_lures)
+    data['n_recent_corrects'] = grouped.apply(self.__count_recent_corrects)
 
     data['n_lures'] =  grouped.lure.transform(
       lambda s: s.count() - s.value_counts()[False]
@@ -81,3 +85,10 @@ class CL2016Preprocessor():
       raw=False
     )
     return df[['n_recent_lures']]
+
+  def __count_recent_corrects(self,df):
+    df['n_recent_corrects'] = df.correct.rolling(self.window_size).apply(
+      lambda l: (l).sum(),
+      raw=False
+    )
+    return df[['n_recent_corrects']]
