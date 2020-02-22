@@ -32,12 +32,8 @@ class CL2016Preprocessor():
 
     data['N'] = np.where(data.condition=='2-back',2,3)
 
-    data['correct'] = np.where(
-      (data.stimulus_type.str == data.choice.str) & (data.stimulus_type != 'burn-in'),
-      True,
-      False
-    )
-    
+    data['correct'] = (data.stimulus_type.str.lower() == data.choice.str.lower()) & (data.stimulus_type.str.lower() != 'burn-in')
+
     grouped  = data.groupby(['participant','block','N'])
     data['n_targets'] = grouped.stimulus_type.transform(lambda s: s.value_counts()['target'])
     
