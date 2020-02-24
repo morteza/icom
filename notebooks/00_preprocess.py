@@ -19,6 +19,9 @@ display(tom2019_df.correct.describe())
 display(tom2019_df['n_targets'].describe())
 display(tom2019_df.n_recent_lures.describe())
 
+cl2016_df.to_csv('data/cl2016_nb.preprocessed.csv')
+tom2019_df.to_csv('data/tom2019.preprocessed.csv')
+
 #%% some basic exploratory reports
 
 # within subject check: if each subject played only a single condition (N)

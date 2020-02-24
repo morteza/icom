@@ -1,49 +1,6 @@
 
 #%% Linear Ridge
 
-import numpy as np
-import pandas as pd
-
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import StandardScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import mean_squared_error
-
-from sklearn.linear_model import Ridge
-
-#y = tom2019_df[['correct','rt']].copy()
-y = tom2019_df[['rt','correct']].values.reshape(-1,2)
-X1 = tom2019_df[['n_recent_targets','n_recent_lures','n_recent_repetitions','N','n_targets','n_lures']].copy()
-X2 = tom2019_df[['n_targets','N']].copy()
-
-steps = [
-  ('impute', SimpleImputer(strategy='constant')),
-  #('onehot', OneHotEncoder(sparse=False)),
-  ('scale', StandardScaler()),
-  ('ridge', Ridge())
-]
-
-pipeline = Pipeline(steps)
-
-#hyperparameters
-parameters = {'ridge__alpha':np.linspace(-4, 0)}
-
-cv = GridSearchCV(pipeline, parameters, cv=5)
-
-cv.fit(X1, y)
-y_pred1 = cv.predict(X1)
-
-cv.fit(X2, y)
-y_pred2 = cv.predict(X2)
-
-error1 = np.sqrt(mean_squared_error(y, y_pred1))
-error2 = np.sqrt(mean_squared_error(y, y_pred2))
-
-print(f"RMSE1={error1}, RMSE2={error2}")
-
 
 #%%
 
@@ -52,6 +9,7 @@ from IPython.display import display
 import matplotlib.pyplot as plt
 
 import numpy as np
+import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from sklearn.cross_decomposition import PLSRegression
