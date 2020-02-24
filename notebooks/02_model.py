@@ -1,4 +1,50 @@
 
+#%% Linear Ridge
+
+import numpy as np
+import pandas as pd
+
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import mean_squared_error
+
+from sklearn.linear_model import Ridge
+
+#y = tom2019_df[['correct','rt']].copy()
+y = tom2019_df[['rt','correct']].values.reshape(-1,2)
+X1 = tom2019_df[['n_recent_targets','n_recent_lures','n_recent_repetitions','N','n_targets','n_lures']].copy()
+X2 = tom2019_df[['n_targets','N']].copy()
+
+steps = [
+  ('impute', SimpleImputer(strategy='constant')),
+  #('onehot', OneHotEncoder(sparse=False)),
+  ('scale', StandardScaler()),
+  ('ridge', Ridge())
+]
+
+pipeline = Pipeline(steps)
+
+#hyperparameters
+parameters = {'ridge__alpha':np.linspace(-4, 0)}
+
+cv = GridSearchCV(pipeline, parameters, cv=5)
+
+cv.fit(X1, y)
+y_pred1 = cv.predict(X1)
+
+cv.fit(X2, y)
+y_pred2 = cv.predict(X2)
+
+error1 = np.sqrt(mean_squared_error(y, y_pred1))
+error2 = np.sqrt(mean_squared_error(y, y_pred2))
+
+print(f"RMSE1={error1}, RMSE2={error2}")
+
+
 #%%
 
 from IPython.display import display
@@ -13,6 +59,9 @@ from sklearn.metrics import mean_squared_error, r2_score, roc_auc_score, roc_cur
 from sklearn.model_selection import cross_val_predict
 
 # data
+
+
+
 X = np.array([[1,2],[3,4],[5,6],[7,8],[9,10],[11,12],[13,14],[15,16]])
 y = [True,False,True,True,True,True,True,False]
 
@@ -54,9 +103,9 @@ mse_error = mean_squared_error(y, y_predicted)
 fpr, tpr, _ = roc_curve(y, y_predicted)
 roc_auc = auc(fpr, tpr)
 
-display(auc_error)
-display(r2_error)
-display(mse_error)
+display('AUC = %.3f' % auc_error)
+display('R2 = %.3f' % r2_error)
+display('MSE = %.3f' % mse_error)
 
 
 #%%
